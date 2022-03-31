@@ -20,7 +20,7 @@ app.get("/api/consultar", async (req, res) => {
     const query = `
         select resultado, registro
         from historico_multiplicaciones
-        where estado = 'A'
+        where activo
     `
     const result = await pool.query(query)
     res.send({ success: true, result: result.rows })
@@ -47,7 +47,7 @@ app.delete("/api/eliminar", async (req, res) => {
   try {
     const query = `
         update historico_multiplicaciones 
-        set estado = 'I' 
+        set activo = false 
       `
     const result = await pool.query(query)
     res.send({ success: true, result: result.rowCount ? "Registros eliminados con Éxito" : "No se encontró empleado" })
