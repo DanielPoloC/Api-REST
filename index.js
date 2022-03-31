@@ -15,26 +15,12 @@ app.get("/", (req, res) => {
   res.send("Developer By: Daniel Eduardo Polo Campo")
 });
 
-app.get("/v1/empleados/obtener", async (req, res) => {
+app.get("/api/consultar", async (req, res) => {
   try {
     const query = `
-      SELECT 
-        id,
-        primer_nombre,
-        otros_nombres,
-        primer_apellido,
-        segundo_apellido,
-        pais_empleo,
-        tipo_identificacion,
-        numero_identificacion,
-        correo_electronico,
-        TO_CHAR(fecha_ingreso, 'DD/MM/YYYY') fecha_ingreso,
-        nombre_area,
-        estado,
-        TO_CHAR(fecha_registro, 'DD/MM/YYYY hh:mm:ss') fecha_registro,
-        TO_CHAR(fecha_edicion, 'DD/MM/YYYY  hh:mm:ss') fecha_edicion
-      FROM empleado 
-      WHERE estado = 'Activo'
+        select resultado, registro
+        from historico_multiplicaciones
+        where estado = 'A'
     `
     const result = await pool.query(query)
     res.send({ success: true, result: result.rows })
@@ -44,83 +30,27 @@ app.get("/v1/empleados/obtener", async (req, res) => {
   }
 });
 
-app.post("/v1/empleados/crear", async (req, res) => {
+app.post("/api/almacenar", async (req, res) => {
   try {
     const query = `
-      insert into empleado
-      (
-        primer_apellido,
-        segundo_apellido,
-        primer_nombre,
-        otros_nombres,
-        pais_empleo,
-        tipo_identificacion,
-        numero_identificacion,
-        correo_electronico,
-        fecha_ingreso,
-        nombre_area,
-        estado
-      )
-      values 
-      (
-        '${req.body.primer_apellido}',
-        '${req.body.segundo_apellido}',
-        '${req.body.primer_nombre}',
-        '${req.body.otros_nombres}',
-        '${req.body.pais_empleo}',
-        '${req.body.tipo_identificacion}',
-        '${req.body.numero_identificacion}',
-        '${req.body.correo_electronico}',
-        TO_DATE('${req.body.fecha_ingreso}', 'DD/MM/YYYY'),
-        '${req.body.nombre_area}',
-        '${req.body.estado}'
-      )
+        insert into historico_multiplicaciones(resultado) values (${req.body.resultado})
     `
     await pool.query(query)
-    res.send({ success: true, result: "Creado con Éxito" })
+    res.send({ success: true, result: "Registro Creado con Éxito" })
   } catch (error) {
     console.error(error);
     res.send({ success: false, result: error.message })
   }
 });
 
-app.put("/v1/empleados/modificar", async (req, res) => {
+app.delete("/api/eliminar", async (req, res) => {
   try {
     const query = `
-      update
-        empleado
-      set
-        primer_apellido = '${req.body.primer_apellido}',
-        segundo_apellido = '${req.body.segundo_apellido}',
-        primer_nombre = '${req.body.primer_nombre}',
-        otros_nombres = '${req.body.otros_nombres}',
-        pais_empleo = '${req.body.pais_empleo}',
-        tipo_identificacion = '${req.body.tipo_identificacion}',
-        numero_identificacion = '${req.body.numero_identificacion}',
-        correo_electronico = '${req.body.correo_electronico}',
-        fecha_ingreso =  TO_DATE('${req.body.fecha_ingreso}', 'DD/MM/YYYY'),
-        nombre_area = '${req.body.nombre_area}',
-        estado= '${req.body.estado}'
-      where
-        numero_identificacion = '${req.body.documento}'
-    `
-    const result = await pool.query(query)
-    res.send({ success: true, result: result.rowCount ? "Modificado con Éxito" : "No se encontró empleado" })
-  } catch (error) {
-    console.error(error);
-    res.send({ success: false, result: error.message })
-  }
-});
-
-app.delete("/v1/empleados/:identificacion/eliminar", async (req, res) => {
-  try {
-    const query = `
-        update empleado 
-        set estado = 'Inactivo' 
-        where numero_identificacion = '${req.params.identificacion}'
+        update historico_multiplicaciones 
+        set estado = 'I' 
       `
     const result = await pool.query(query)
-    res.send({ success: true, result: result.rowCount ? "Eliminado con Éxito" : "No se encontró empleado" })
+    res.send({ success: true, result: result.rowCount ? "Registros eliminados con Éxito" : "No se encontró empleado" })
   } catch (error) {
     console.error(error);
     res.send({ success: false, result: error.message })
